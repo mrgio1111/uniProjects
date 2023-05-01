@@ -1,0 +1,21 @@
+version: "3"
+name: "spotify-api"
+services:
+  front-end:
+    build:
+      context: .
+      args:
+        - SPPATH=front-end
+    env_file:
+      - .env
+    ports:
+      - ${FRONTEND_PORT:-3000}:3000
+  back-end:
+    build:
+      context: .
+      args:
+        - SPPATH=back-end
+    env_file:
+      - .env
+    ports:
+      - ${BACKEND_PORT:-8080}:8080
