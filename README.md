@@ -457,3 +457,5 @@ The point distribution for your grade will look as follows:
 
 For design, we will be paying attention to things such as good use of inheritance, encapsulation, polymorphism etc.
 Note that functionality and design go together. We cannot judge your design properly if there is not sufficient functionality for us to judge. It is easy to submit a perfectly designed `Hello World!` program, but this will (obviously) not get you any points.
+
+The assignment scored a 8.2/10
