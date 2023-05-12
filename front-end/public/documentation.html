@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Documentation </title>
+  </head>
+  <body>
+  <h1>How To Run The Application</h1>
+  <h2> Getting Started</h2>
+  <p> The first thing you need to do is open the terminal and run "docker compose up" to set up your containers (We assume docker is already installed).
+      After running the command the following message will appear:
+  </p>
+  <p> 
+    <ul>
+        <li> Front-end listening on port 3000 </li>
+        <li> Spotify dataset api listening on port 8080 </li>
+        <li> Connected to the local spotify database. </li>
+    </ul>
+  </p>
+  <h2> Navigating Through The Application </h2>
+  <h3> The Back-End </h3>
+  <p> Search "localhost:8080" on your browser. There you will see our swagger specification which you can test yourself. It is easy to navigate and thoroughly explained. </p>
+  <h3> The Front-End</h3>
+  <p> Once more search for "localhost:3000" on your browser. This is a webpage where you can test the functionality of our application. 
+    The first thing you will notice is the bolded titles. Each of these titles briefly describe the functionality.
+  </p>
+  <h2> Usage of the Front-End </h2>
+  <h3> Look up Track by Name</h3>
+  In this section you will see a blank which should be filled with a name of a track. After filling the name of the track an pressing the button "Retrieve track"
+  you will receive information about that song.
+  <h3> Look up Track by Artist Id</h3>
+      <p>In this section you will see a blank which should be filled with the artistId of the artist who wrote the track. After filling the artistId press the button "Retrieve track" and you
+        will receive information about songs that the artist wrote.</p>
+  <h3> Retrieve Track by ID </h3>
+  <p> In this section you will see a blank which should be filled with the ID of a track. After filling the ID of the track and pressing the button "Retrieve track"
+    you will receive information about that song. </p>
+  <h3> Top N tracks / Top N artists per year</h3>
+  <p> This section will show a list of top n songs or artists in a given year. They are filtered by popularity. First you must select whether you want the top n tracks or artitsts
+    in a box. Afterwards you must select the number of songs you want to see (top n) and the year. Also you can select how many results you want to see on a single page. Lastly click the "Retrieve track" button and the list will be shown.
+  </p>
+  <h3> Create Track by ID</h3>
+  <p> Here you can create a new track by filling the blanks with the appropiate information. There are mostly blanks but there are some other futures s well like checking \
+    a box or filling a relese date. Fter filling in all the information press on the "Create track" button.
+  </p>
+  <h3> Delete Track by ID </h3>
+  <p> In the blank enter a track ID and click on the "Delete track" button. This will delete the track from our database and it won't be visible anymore.</p>
+  <h3> Delete all tracks by artist ID</h3>
+  <p> To delete all tracks of a specific artist fill in the blank with the artist ID. CLick on the "Delete tracks" button and the operation will be complete.</p>
+  <h3> Retrieve artist summary by artist ID </h3>
+  <p> Enter the artist ID in the blank and press the "Submit" button. This will retrieve the song count, the latest release (song) and its information, the earliest release
+    and its information and the highest popularity.
+  </p>
+  <h3> Update Track</h3>
+  <p> The interface for updating a track shows up when you first request that track. The information of the track is shown and you can change it however you like. The 
+    fields are the same as the ones in the Create track. </p>
+  </body>
+</html>

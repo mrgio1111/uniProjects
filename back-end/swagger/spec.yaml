@@ -1,0 +1,518 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Spotify 1921-2020 API
+  description: An API for making queries on the Spotify 1921-2020 dataset found at https://www.kaggle.com/datasets/yamaerenay/spotify-dataset-19212020-600k-tracks?select=tracks.csv
+
+servers:
+  - url: http://localhost:8080
+    description: Future backend implementation
+
+components:
+  schemas:
+    Artist:
+      type: object
+      required:
+        - "id"
+        - "followers"
+        - "genres"
+        - "name"
+        - "popularity"
+      properties:
+        id:
+          type: string
+          readOnly: true
+        followers:
+          type: integer
+        genres:
+          type: array
+          items:
+            type: string
+        name:
+          type: string
+        popularity:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Popularity of artist from 1 to 100
+    ArtistSummary:
+      type: object
+      properties:
+        song_count:
+          type: integer
+          description: Number of songs
+          readOnly: true
+        earliest_release:
+          $ref: "#/components/schemas/Track"
+        latest_release:
+          $ref: "#/components/schemas/Track"
+        highest_popularity:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Highest popularity among all songs by the artist
+          readOnly: true
+    Track:
+      type: object
+      required:
+        - "id"
+        - "name"
+        - "popularity"
+        - "duration_ms"
+        - "explicit"
+        - "artists"
+        - "id_artists"
+        - "release_date"
+        - "danceability"
+        - "energy"
+        - "key"
+        - "loudness"
+        - "mode"
+        - "speechiness"
+        - "acousticness"
+        - "instrumentalness"
+        - "liveness"
+        - "valence"
+        - "tempo"
+        - "time_signature"
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        popularity:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Popularity of track from 1 to 100
+        duration_ms:
+          type: integer
+          description: Duration of songs in ms
+        explicit:
+          type: boolean
+          description: Whether it contains explicit content or not
+        artists:
+          type: array
+          items:
+            type: string
+          description: Artists who created the track
+        id_artists:
+          type: array
+          items:
+            type: string
+        release_date:
+          type: string
+        danceability: 
+          type: number
+          minimum: 0
+          maximum: 1
+          description: How danceable a song is in range 0 to 1
+        energy:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: How energized a song is in range 0 to 1
+        key:
+          type: integer
+          minimum: 0
+          maximum: 11
+          description: major note of track 
+        loudness:
+          type: integer
+          description: How loud a song is in db
+        mode: 
+          type: integer
+          minimum: 0
+          maximum: 1
+          description: The modality of track, 0 if minor and 1 if major
+        speechiness: 
+          type: number
+          minimum: 0
+          maximum: 1
+          description: The presence of spoken words in track in range 0 to 1
+        acousticness:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: How acoustic a track is in range 0 to 1
+        instrumentalness:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: The absence of vocal sounds in track in range 0 to 1 
+        liveness:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: The presence of audience in track in range 0 to 1
+        valence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: The positiveness of the track in range 0 to 1
+        tempo:
+          type: integer
+          description: The overall tempo of track in BPM
+        time_signature:
+          type: integer 
+          description: The time signature (4 in almost every track)
+
+  responses:
+    BadRequest:
+      description: Request was not well-formed, see error details
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error-message:
+                type: string
+                description: Error message detailing the problem with the request
+
+    NotFound:
+      description: Resource not found
+
+    NoResults:
+      description: List empty; no results
+
+    ServerError:
+      description: Server error; no results, try again later
+        
+  parameters:
+    track-selector-id:
+      name: trackId
+      in: path
+      required: true
+      description: The id of the track
+      schema:
+        type: string
+    track-filter-year:
+      name: year
+      in: path
+      description: Filtering the results by year
+      required: true
+      schema:
+        type: integer
+    track-filter-name:
+      name: trackName
+      in: query
+      required: false
+      description: Filtering the results by name
+      schema:
+        type: string
+    returnLimit:
+      name: returnLimit
+      in: query
+      required: true
+      description: Limit the number of returns
+      schema:
+        type: integer
+    artist-selector-id:
+      name: artistId
+      in: query
+      required: true
+      schema:
+        type: string
+    artist-filter-id:
+      name: artistId
+      in: query
+      required: false
+      schema:
+        type: string
+    artist-filter-year:
+      name: year
+      in: path
+      description: Filtering the results by year
+      required: true
+      schema:
+        type: integer
+    batch-size-selector:
+      name: N
+      in: query
+      description: The number of results to return
+      required: true
+      schema:
+        type: integer
+    return-count-selector:
+      name: M
+      in: query
+      description: The number of results to return in each batch
+      required: true
+      schema:
+        type: integer
+        enum: [10, 20, 50, 100]
+    page-selector:
+      name: page
+      in: query
+      description: The current page of the batches
+      required: true
+      schema:
+        type: integer
+        minimum: 0
+    format-selector:
+      name: format
+      in: query
+      description: The format of the response body (json|csv)
+      schema:
+        type: string
+        enum: [json, csv]
+
+    
+
+paths:
+  /tracks/{trackId}:
+    get: #Retrieve all information for a specific track
+      tags:
+        - Tracks
+      summary: Retrieve track information
+      description: Retrieve all information for a specific track by its unique ID
+      parameters:
+        - $ref: '#/components/parameters/track-selector-id'
+        - $ref: '#/components/parameters/format-selector'
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Track"
+            text/csv:
+              schema:
+                type: string
+        '204':
+          $ref: "#/components/responses/NoResults"
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+    put: #Update track information
+      tags:
+        - Tracks
+      summary: Update track information
+      description: Updates the track with the given id
+      parameters:
+        - $ref: '#/components/parameters/track-selector-id'
+        - $ref: '#/components/parameters/format-selector'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Track"
+      responses:
+        '200':
+          description: "Movie updated, returns the new state"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Track"
+            text/csv:
+              schema:
+                type: string
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref: "#/components/responses/NotFound"
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+    delete: #Delete a track
+      tags:
+        - Tracks
+      summary: Delete a track
+      description: Deletes the track with the given id
+      parameters:
+        - $ref: '#/components/parameters/track-selector-id'
+      responses:
+        '204':
+          description: Track deleted successfully
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref: "#/components/responses/NotFound"
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /tracks/mostPopular/{year}:
+    get: # Retrieve a list of the top N songs by popularity in a specific year
+      tags:
+        - Tracks
+      summary: Returns N songs filtered by popularity and year
+      description: Retrieve a list of the top N songs by popularity in a specific year
+      parameters:
+        - $ref: '#/components/parameters/track-filter-year'
+        - $ref: '#/components/parameters/batch-size-selector'
+        - $ref: '#/components/parameters/return-count-selector'
+        - $ref: '#/components/parameters/page-selector'
+        - $ref: '#/components/parameters/format-selector'
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Track"
+            text/csv:
+              schema:
+                type: string
+        '204':
+          $ref: "#/components/responses/NoResults"
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /tracks:
+    get: # Retrieve all songs filtered by song name or artist
+      tags:
+        - Tracks
+      summary: Returns songs filtered by song name or artist
+      description: Returns songs filtered by song name or artist
+      parameters:
+        - $ref: '#/components/parameters/track-filter-name'
+        - $ref: '#/components/parameters/artist-filter-id'
+        - $ref: '#/components/parameters/format-selector'
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Track"
+            text/csv:
+              schema:
+                type: string
+        '204':
+          $ref: "#/components/responses/NoResults"
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+    post: #Create a track
+      tags:
+        - Tracks
+      summary: Create a new track
+      description: Creates a new track with the given information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Track"
+          text/csv:
+            schema:
+              type: string
+      responses:
+        '201':
+          description: Track successfully created
+          content:
+            application/json:
+              schema:
+                type: string
+                description: ID of newly created track
+          headers:
+            Location:
+              schema:
+                type: string
+              description: The URL of the newly-created track
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+    delete: # Delete all songs by a specific artist
+      tags:
+        - Tracks
+      summary: Delete all tracks by a specific artist
+      description: Delete all tracks by a specific artist
+      parameters:
+        - $ref: '#/components/parameters/artist-selector-id' #This needs to be required
+      responses:
+        '204':
+          description: Artist deleted successfully
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref: "#/components/responses/NotFound"
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+      
+  /artist/summary:
+    get: # Retrieve summary info for a specific artist.
+      tags:
+        - Artists
+      summary: Retrieve summary info for a specific artist
+      description: Retrieve summary info for a specific artist
+      parameters: 
+        - $ref: '#/components/parameters/artist-selector-id'
+        - $ref: '#/components/parameters/format-selector'
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtistSummary"
+            text/csv:
+              schema:
+                type: string
+        '204':
+          $ref: "#/components/responses/NoResults"
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+      
+  /artists/mostPopular/{year}:
+    get: # Retreive a list of the top N artists for a given year by popularity returned in batches
+      tags:
+        - Artists
+      summary: Retreive a list of the top N artists filtered by popularity
+      description: Retreive a list of the top N artists filtered by popularity
+      parameters:
+        - $ref: '#/components/parameters/artist-filter-year'
+        - $ref: '#/components/parameters/batch-size-selector'
+        - $ref: '#/components/parameters/return-count-selector'
+        - $ref: '#/components/parameters/page-selector'
+        - $ref: '#/components/parameters/format-selector'
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Artist"
+            text/csv:
+              schema:
+                type: string
+        '204':
+          $ref: "#/components/responses/NoResults"
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+      
