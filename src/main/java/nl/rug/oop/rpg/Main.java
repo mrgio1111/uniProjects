@@ -34,10 +34,11 @@ public class Main {
         shire.addEnemies(boar);
         shire.addEnemies(orc);
         Game game = new Game(player);
+        GameManager gameManager = new GameManager(game);
         game.addRoom(shire);
         game.addRoom(momsHouse);
         game.addRoom(hogwarts);
         game.populateMenuArray();
-        game.runGameMenu();
+        gameManager.getCurrentGame().runGameMenu();
     }
 }

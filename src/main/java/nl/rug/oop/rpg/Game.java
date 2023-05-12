@@ -21,7 +21,7 @@ public class Game implements Serializable {
     private String[] interactMenuArray = new String[9];
     private List<String> files;
     private transient Scanner scanner = new Scanner(System.in);
-    private Game savedGame;
+    private GameManager gameManager = new GameManager(this);
 
     /**
      * Constructor for game.
@@ -116,7 +116,7 @@ public class Game implements Serializable {
                 }
             }
             if (choice == 5) {
-                loadGame("quicksave.ser");
+                gameManager.loadGame("quicksave.ser");
             }
             if (choice == 6) {
                 System.out.println("Enter a filename: ");
@@ -157,31 +157,14 @@ public class Game implements Serializable {
     public void chooseFile(){
         int choice = scanner.nextInt();
         if (choice == 0 && files.size() >= 0) {
-            loadGame(files.get(0));
+            gameManager.loadGame(files.get(0));
         }
         if (choice == 1 && files.size() <= 1) {
-            loadGame(files.get(1));
+            gameManager.loadGame(files.get(1));
         }
         if (choice == 2 && files.size() <= 2) {
-            loadGame(files.get(2));
+            gameManager.loadGame(files.get(2));
         }
-    }
-
-    /**
-     * This method calls the 'load' method.
-     * @param filename is the name of the file.
-     */
-    public void loadGame(String filename){
-        try {
-            savedGame = load("savedgames", filename);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return;
-        }
-        System.out.println("Load Successful!");
     }
 
     /**
