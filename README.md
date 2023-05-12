@@ -1,6 +1,5 @@
 # Web Engineering 2022-23 Project Description  
 
-## 1 Introduction
 This is a group project for 2-3 students to practice web engineering concepts discussed in lectures and tutorials. The project aims to develop a web application based on the Spotify 1921-2020 dataset, specifically the songs statistics set available at Kaggle. The dataset is available in CSV format and is relatively large, so it needs to be processed before incorporation into the application. The project has three milestones with associated deliverables and deadlines.
 
 As part of a collaborative group project, my team and I developed a comprehensive web application based on the Spotify 1921-2020 dataset, which is a large dataset containing song statistics. The project provided us with the opportunity to put into practice web engineering concepts learned during lectures and tutorials.
