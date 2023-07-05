@@ -2,7 +2,7 @@
   "name": "spotify-dataset-api",
   "version": "1.0.0",
   "description": "An API for making queries on the Spotify 1921-2020 dataset found at https://www.kaggle.com/datasets/yamaerenay/spotify-dataset-19212020-600k-tracks?select=tracks.csv",
-  "main": "api/src/index.js",
+  "main": "back-end/src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev_f": "nodemon --watch front-end/ -e js,html front-end/src/index.js"

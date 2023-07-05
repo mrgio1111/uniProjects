@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Spotify API</title>
+</head>
+
+<body>
+  <a href="./documentation.html">Documentation</a>
+  <a href="./report.html">Report</a>
+
+  <h1>Look up Track by Name</h1>
+  <form>
+    <label for="track-name">Track Name:</label>
+    <input type="text" id="track-name" name="track-name">
+    <button type="button" onclick="getTrackByName()">Retrieve Track</button>
+  </form>
+  <h1>Look up Tracks by Artist Id</h1>
+  <form>
+    <label for="artist-id">Artist Id:</label>
+    <input type="text" id="artist-id" name="artist-id">
+    <button type="button" onclick="getTrackByArtistId()">Retrieve Tracks</button>
+  </form>
+  <h1>Retrieve Track by ID</h1>
+  <form>
+    <label for="track-id">Track ID:</label>
+    <input type="text" id="track-id" name="track-id">
+    <button type="button" onclick="getTrackById()">Retrieve Track</button>
+  </form>
+  <h1>Retrieve Artist Summary by ID</h1>
+  <form>
+    <label for="artist-id-summary">Artist ID:</label>
+    <input type="text" id="artist-id-summary" name="artist-id-summary">
+    <button type="button" onclick="getArtistSummary()">Retrieve Summary</button>
+  </form>
+  <div id="artist-summary"></div>
+
+  <h1>Top N artists / Top N artists per year</h1>
+  <form>
+    <label for="tracks-or-artists">Tracks/Artists:</label>
+    <select name="tracks-or-artists" id="tracks-or-artists">
+      <option value="tracks">Tracks</option>
+      <option value="artists">Artists</option>
+    </select>
+    <label for="year">Year:</label>
+    <input type="number" id="filter-year" name="year">
+    <label for="filter-N">Number of results:</label>
+    <input type="number" id="filter-N" name="filter-N">
+    <label for="filter-M">Results per page:</label>
+    <select name="filter-M" id="filter-M">
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+    <button type="button" onclick="getTop(false)">Retrieve Track</button>
+  </form>
+  <div id="results-menu" style="width: 800px;">
+    <div id="top-results"
+      style="display: flex; flex-direction: column; height: 300px;overflow-y: scroll; border: 2px solid gray;">
+    </div>
+    <div id="controls">
+      <button id="controls-left" onclick="navigate(-1)">
+        <</button>
+          <button id="controls-right" onclick="navigate(1)">></button>
+    </div>
+  </div>
+  <div id="popup-results" style="display: none;">
+    <a href="#" onclick="closePopup()" style="position: absolute; right: 10px;">x</a>
+    <div id="track-info"></div>
+    <div id="update-form">
+      <h1>Edit:</h1>
+      <form>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br>
+
+        <label for="popularity">Popularity:</label>
+        <input type="number" id="popularity" name="popularity"><br>
+
+        <label for="duration_ms">Duration (ms):</label>
+        <input type="number" id="duration_ms" name="duration_ms"><br>
+
+        <label for="explicit">Explicit:</label>
+        <input type="checkbox" id="explicit" name="explicit"><br>
+
+        <label for="artists">Artists:</label>
+        <input type="text" id="artists" name="artists"><br>
+
+        <label for="id_artists">Artist ID:</label>
+        <input type="text" id="id_artists" name="id_artists"><br>
+
+        <label for="release_date">Release Date:</label>
+        <input type="date" id="release_date" name="release_date"><br>
+
+        <label for="danceability">Danceability:</label>
+        <input type="number" step="0.1" id="danceability" name="danceability"><br>
+
+        <label for="energy">Energy:</label>
+        <input type="number" step="0.1" id="energy" name="energy"><br>
+
+        <label for="key">Key:</label>
+        <input type="text" id="key" name="key"><br>
+
+        <label for="loudness">Loudness:</label>
+        <input type="text" id="loudness" name="loudness"><br>
+
+        <label for="mode">Mode:</label>
+        <input type="text" id="mode" name="mode"><br>
+
+        <label for="speechiness">Speechiness:</label>
+        <input type="text" id="speechiness" name="speechiness"><br>
+
+        <label for="acousticness">Acousticness:</label>
+        <input type="text" id="acousticness" name="acousticness"><br>
+
+        <label for="instrumentalness">Instrumentalness:</label>
+        <input type="text" id="instrumentalness" name="instrumentalness"><br>
+
+        <label for="liveness">Liveness:</label>
+        <input type="text" id="liveness" name="liveness"><br>
+
+        <label for="valence">Valence:</label>
+        <input type="text" id="valence" name="valence"><br>
+
+        <label for="tempo">Tempo:</label>
+        <input type="number" id="tempo" name="tempo">
+        <br>
+        <label for="time_signature">Time Signature:</label>
+        <input type="number" id="time_signature" name="time_signature">
+        <br><br>
+
+        <button type="submit" onclick="updateTrack()">Update Track</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function getTrackById() {
+      let trackId = document.querySelector("#track-id").value;
+      fetch(`http://localhost:8080/tracks/${trackId}`)
+        .then(response => response.json())
+        .then(data => {
+          updateTrackInfo(data);
+        })
+        .catch(error => console.error(error));
+    }
+
+    function getTrackByArtistId() {
+      let artistId = document.querySelector("#artist-id").value;
+      fetch(`http://localhost:8080/tracks?artistId=${artistId}`)
+        .then(response => response.json())
+        .then(data => {
+          updateTrackInfo(data);
+        })
+        .catch(error => console.error(error));
+    }
+
+    function getTrackByName() {
+      let trackName = document.querySelector("#track-name").value;
+      fetch(`http://localhost:8080/tracks?trackName=${trackName}`)
+        .then(response => response.json())
+        .then(dataArray => {
+          let data = dataArray[0];
+          updateTrackInfo(data);
+        })
+        .catch(error => console.error(error));
+    }
+
+    function updateTrackInfo(data) {
+      let trackInfo = `<pre>${JSON.stringify(data, null, 2)}</pre>`
+      document.querySelector("#track-info").innerHTML = trackInfo;
+      document.querySelector("#popup-results").style.display = "block";
+      document.querySelector("#name").value = data.name;
+      document.querySelector("#popularity").value = data.popularity;
+      document.querySelector("#duration_ms").value = data.duration_ms;
+      document.querySelector("#explicit").value = data.explicit;
+      document.querySelector("#artists").value = data.artists;
+      document.querySelector("#id_artists").value = data.id_artists;
+      document.querySelector("#release_date").value = data.release_date;
+      document.querySelector("#danceability").value = data.danceability;
+      document.querySelector("#energy").value = data.energy;
+      document.querySelector("#key").value = data.key;
+      document.querySelector("#loudness").value = data.loudness;
+      document.querySelector("#mode").value = data.mode;
+      document.querySelector("#speechiness").value = data.speechiness;
+      document.querySelector("#acousticness").value = data.acousticness;
+      document.querySelector("#instrumentalness").value = data.instrumentalness;
+      document.querySelector("#liveness").value = data.liveness;
+      document.querySelector("#valence").value = data.valence;
+      document.querySelector("#tempo").value = data.tempo;
+      document.querySelector("#time_signature").value = data.time_signature;
+    }
+
+    function updateTrack() {
+      let updatedTrack = {
+        name: document.querySelector("#name").value,
+        popularity: document.querySelector("#popularity").value,
+        duration_ms: document.querySelector("#duration_ms").value,
+        explicit: document.querySelector("#explicit").value,
+        artists: document.querySelector("#artists").value,
+        id_artists: document.querySelector("#id_artists").value,
+        release_date: document.querySelector("#release_date").value,
+        danceability: document.querySelector("#danceability").value,
+        energy: document.querySelector("#energy").value,
+        key: document.querySelector("#key").value,
+        loudness: document.querySelector("#loudness").value,
+        mode: document.querySelector("#mode").value,
+        speechiness: document.querySelector("#speechiness").value,
+        acousticness: document.querySelector("#acousticness").value,
+        instrumentalness: document.querySelector("#instrumentalness").value,
+        liveness: document.querySelector("#liveness").value,
+        valence: document.querySelector("#valence").value,
+        tempo: document.querySelector("#tempo").value,
+        time_signature: document.querySelector("#time_signature").value
+      };
+      let trackId = document.querySelector("#track-id").value;
+      fetch(`http://localhost:8080/tracks/${trackId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTrack)
+      })
+        .then(response => {
+          if (response.ok) {
+            alert('Track updated successfully');
+          } else {
+            alert('Error updating track');
+          }
+        })
+        .catch(error => console.error(error));
+    }
+
+    var results = { year: null, opt: null, N: null, M: null, page: null, maxPage: null };
+
+    function getTop(update) {
+      const resultView = document.querySelector('#top-results');
+      if (!update) {
+        results.year = document.querySelector('#filter-year').value;
+        results.opt = document.querySelector('#tracks-or-artists').value;
+        results.N = document.querySelector('#filter-N').value;
+        results.M = document.querySelector('#filter-M').value;
+        results.page = 0;
+        results.maxPage = Math.ceil(results.N / results.M);
+      }
+      resultView.innerHTML = '';
+      fetch(`http://localhost:8080/${results.opt}/mostPopular/${results.year}?N=${results.N}&M=${results.M}&page=${results.page}`)
+        .then(response => response.json())
+        .then(dataArray => {
+          let i = results.page * results.M + 1;
+          dataArray.forEach(element => {
+            let entry = document.createElement('div');
+            let artistMention = element.artists ? ` - ${element.artists}` : '';
+            entry.innerHTML = `${i++}: ${element.name}${artistMention} (${element.id})`;
+            entry.style.borderBottom = "1px solid gray";
+            entry.style.padding = "2px";
+            resultView.appendChild(entry);
+          });
+        })
+        .catch(error => console.error(error));
+    }
+
+    function navigate(direction) {
+      let newPage = results.page + direction;
+      if (newPage >= 0 && newPage < results.maxPage) {
+        results.page = newPage;
+        getTop(true);
+      }
+    }
+
+    function getArtistSummary() {
+      let artistId = document.querySelector("#artist-id-summary").value;
+      fetch(`http://localhost:8080/artist/summary?artistId=${artistId}`)
+        .then(response => {
+          if (response.status === 404) {
+            throw new Error("artist not found");
+          } else if (response.ok) {
+            return response.json();
+          }
+          throw new Error("An error occurred. Please try again later.");
+        })
+        .then(data => {
+          let artistSummary = document.querySelector("#artist-summary");
+          artistSummary.innerHTML = `
+          <p>Song Count: ${data.song_count}</p>
+          <p>Earliest Release: ${data.earliest_release.name} (${data.earliest_release.id})</p>
+          <p>Latest Release: ${data.latest_release.name} (${data.latest_release.id})</p>
+          <p>Highest Popularity: ${data.highest_popularity}</p>
+        `;
+        })
+        .catch(error => {
+          if (error.message === "artist not found") {
+            alert("Artist not found.");
+          } else {
+            console.error(error);
+            alert("An error occurred. Please try again later.");
+          }
+        });
+    }
+
+    function closePopup() {
+      document.querySelector('#popup-results').style.display = "none";
+    }
+  </script>
+
+
+
+  <h1>Create Track by ID</h1>
+  <form id="new-track-form" method="post" action="/tracks">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name"><br>
+
+    <label for="popularity">Popularity:</label>
+    <input type="number" id="popularity" name="popularity"><br>
+
+    <label for="duration_ms">Duration (ms):</label>
+    <input type="number" id="duration_ms" name="duration_ms"><br>
+
+    <label for="explicit">Explicit:</label>
+    <input type="checkbox" id="explicit" name="explicit"><br>
+
+    <label for="artists">Artists:</label>
+    <input type="text" id="artists" name="artists"><br>
+
+    <label for="id_artists">Artist ID:</label>
+    <input type="text" id="id_artists" name="id_artists"><br>
+
+    <label for="release_date">Release Date:</label>
+    <input type="date" id="release_date" name="release_date"><br>
+
+    <label for="danceability">Danceability:</label>
+    <input type="number" step="0.1" id="danceability" name="danceability"><br>
+
+    <label for="energy">Energy:</label>
+    <input type="number" step="0.1" id="energy" name="energy"><br>
+
+    <label for="key">Key:</label>
+    <input type="text" id="key" name="key"><br>
+
+    <label for="loudness">Loudness:</label>
+    <input type="text" id="loudness" name="loudness"><br>
+
+    <label for="mode">Mode:</label>
+    <input type="text" id="mode" name="mode"><br>
+
+    <label for="speechiness">Speechiness:</label>
+    <input type="text" id="speechiness" name="speechiness"><br>
+
+    <label for="acousticness">Acousticness:</label>
+    <input type="text" id="acousticness" name="acousticness"><br>
+
+    <label for="instrumentalness">Instrumentalness:</label>
+    <input type="text" id="instrumentalness" name="instrumentalness"><br>
+
+    <label for="liveness">Liveness:</label>
+    <input type="text" id="liveness" name="liveness"><br>
+
+    <label for="valence">Valence:</label>
+    <input type="text" id="valence" name="valence"><br>
+
+    <label for="tempo">Tempo:</label>
+    <input type="number" id="tempo" name="tempo">
+    <br>
+    <label for="time_signature">Time Signature:</label>
+    <input type="number" id="time_signature" name="time_signature">
+    <br><br>
+
+    <button type="submit">Create Track</button>
+  </form>
+  <script>
+    const form = document.getElementById('new-track-form');
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      // retrieves and saves form variables
+      const name = document.getElementById('name').value;
+      const popularity = document.getElementById('popularity').value;
+      const duration_ms = document.getElementById('duration_ms').value;
+      const explicit = document.getElementById('explicit').checked;
+      const artists = document.getElementById('artists').value;
+      const id_artists = document.getElementById('id_artists').value;
+      const release_date = document.getElementById('release_date').value;
+      const danceability = document.getElementById('danceability').value;
+      const energy = document.getElementById('energy').value;
+      const key = document.getElementById('key').value;
+      const loudness = document.getElementById('loudness').value;
+      const mode = document.getElementById('mode').value;
+      const speechiness = document.getElementById('speechiness').value;
+      const acousticness = document.getElementById('acousticness').value;
+      const instrumentalness = document.getElementById('instrumentalness').value;
+      const liveness = document.getElementById('liveness').value;
+      const valence = document.getElementById('valence').value;
+      const tempo = document.getElementById('tempo').value;
+      const time_signature = document.getElementById('time_signature').value;
+
+      const track = {
+        name: name,
+        popularity: popularity,
+        duration_ms: duration_ms,
+        explicit: explicit,
+        artists: artists,
+        id_artists: id_artists,
+        release_date: release_date,
+        danceability: danceability,
+        energy: energy,
+        key: key,
+        loudness: loudness,
+        mode: mode,
+        speechiness: speechiness,
+        acousticness: acousticness,
+        instrumentalness: instrumentalness,
+        liveness: liveness,
+        valence: valence,
+        tempo: tempo,
+        time_signature: time_signature
+      }
+
+      fetch('/tracks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(track)
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.message);
+          const jsonData = JSON.stringify(track, null, 2);
+          const jsonDataContainer = document.getElementById('json-data-container');
+          jsonDataContainer.textContent = jsonData;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+  </script>
+  <pre id="json-data-container"></pre>
+
+  <h1>Delete Track by ID</h1>
+  <form id="delete-track-form">
+    <label for="track-id">Track ID:</label>
+    <input type="text" id="track-id" name="track-id">
+    <button type="button" onclick="deleteTrackById()">Delete Track</button>
+  </form>
+
+  <div id="delete-status"></div>
+
+  <script>
+    function deleteTrackById() {
+      let trackId = document.querySelector("#track-id").value;
+
+      fetch(`http://localhost:8080/tracks/${trackId}`, {
+        method: 'DELETE'
+      })
+        .then(response => {
+          if (response.ok) {
+            alert('Track updated successfully');
+          } else {
+            alert('Error updating track');
+          }
+        })
+        .catch(error => console.error(error));
+    }
+  </script>
+
+  <h1>Delete all tracks by artist ID</h1>
+  <form>
+    <label for="artist-id">Artist ID:</label>
+    <input type="text" id="artist-id" name="artist-id">
+    <button type="button" onclick="deleteTracksByArtist()">Delete Tracks</button>
+  </form>
+
+  <script>
+    function deleteTracksByArtist() {
+      let artistId = document.querySelector("#artist-id").value;
+      fetch(`http://localhost:8080/tracks?artistId=${artistId}`, {
+        method: "DELETE"
+      })
+        .then(response => {
+          if (response.ok) {
+            alert('Artist tracks deleted successfully');
+          }
+          throw new Error("Error deleting tracks");
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+  </script>
+  <style>
+    #popup-results {
+      transform: translateX(-50%);
+      position: absolute; 
+      left: 50vw; 
+      top: 10px; 
+      background-color: white; 
+      border: 2px solid gray;
+      border-radius: 0.5em;
+      padding: 5px;
+    }
+  </style>
+
+</body>
+
+</html>
